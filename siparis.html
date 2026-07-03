@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sipariş — StickerLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Familjen+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFF8E7;--ink:#1A1A1A;--hot:#FF3D5A;--lime:#C8FF3D;--paper:#FFFDF5;--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Familjen Grotesk',sans-serif}
+body{background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,.07) 1px,transparent 0);background-size:22px 22px;min-height:100vh}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer;border:none;background:none}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 40px;border-bottom:3px solid var(--ink);background:var(--bg);position:sticky;top:0;z-index:100}
+.logo{font-family:'Bowlby One';font-size:26px;letter-spacing:-1px;transform:rotate(-2deg);display:inline-block}.logo span{color:var(--hot)}
+.back-btn{font-weight:700;font-size:13px;border:2px solid var(--ink);padding:8px 20px;border-radius:999px;cursor:pointer;background:var(--bg)}.back-btn:hover{background:var(--lime)}
+.wrap{max-width:900px;margin:40px auto;padding:0 20px}
+h1{font-family:'Bowlby One';font-size:44px;letter-spacing:-1px;margin-bottom:8px}
+.subtitle{color:#666;margin-bottom:30px}
+.grid{display:grid;grid-template-columns:1fr 380px;gap:24px}
+@media (max-width:768px){.grid{grid-template-columns:1fr}}
+.card{background:var(--paper);border:3px solid var(--ink);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
+.card h2{font-family:'Bowlby One';font-size:20px;margin-bottom:16px}
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+.field input,.field textarea{width:100%;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;font-family:inherit;font-size:14px;background:var(--bg)}
+.field textarea{min-height:80px;resize:vertical}
+.cart-list{max-height:400px;overflow-y:auto;margin-bottom:16px}
+.cart-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed #ccc;align-items:center}
+.cart-item img{width:50px;height:50px;object-fit:contain;background:#fff;border:1px solid #ddd;border-radius:8px}
+.cart-item .info{flex:1;font-size:13px}
+.cart-item .name{font-weight:700}
+.cart-item .adet{color:#666;font-size:12px}
+.cart-item .fiyat{font-weight:700}
+.empty{padding:30px;text-align:center;color:#999}
+.toplam-satir{display:flex;justify-content:space-between;padding:14px 0;font-weight:700;border-top:2px solid var(--ink);margin-top:10px}
+.toplam-satir .tp{font-family:'Bowlby One';font-size:22px;color:var(--hot)}
+.btn-siparis{display:block;width:100%;padding:18px;background:#25D366;color:#fff;border:3px solid var(--ink);border-radius:14px;font-family:'Bowlby One';font-size:15px;letter-spacing:.5px;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform .1s}
+.btn-siparis:hover{transform:translate(-2px,-2px);box-shadow:var(--shadow)}
+.btn-siparis:disabled{background:#ccc;cursor:not-allowed;transform:none;box-shadow:var(--shadow-sm)}
+.note{font-size:12px;color:#666;text-align:center;margin-top:10px;line-height:1.5}
+.hata{background:#fee;border:2px solid var(--hot);padding:12px;border-radius:12px;color:#c00;font-size:13px;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html" class="logo">Sticker<span>Lab</span></a>
+  <a href="favoriler.html" class="back-btn">← Sepete Dön</a>
+</div>
+
+<div class="wrap">
+  <h1>Sipariş Ver</h1>
+  <p class="subtitle">Bilgileri doldur, WhatsApp üzerinden siparişini onayla.</p>
+  
+  <div class="grid">
+    <div class="card">
+      <h2>📋 Bilgilerin</h2>
+      <div id="hata" class="hata" style="display:none"></div>
+      
+      <div class="field">
+        <label>Ad Soyad *</label>
+        <input type="text" id="ad" placeholder="Örn: Ahmet Yılmaz">
+      </div>
+      <div class="field">
+        <label>Telefon *</label>
+        <input type="tel" id="tel" placeholder="Örn: 0532 123 45 67">
+      </div>
+      <div class="field">
+        <label>Şehir / İlçe *</label>
+        <input type="text" id="sehir" placeholder="Örn: İstanbul / Kadıköy">
+      </div>
+      <div class="field">
+        <label>Adres *</label>
+        <textarea id="adres" placeholder="Mahalle, sokak, kapı numarası..."></textarea>
+      </div>
+      <div class="field">
+        <label>Not (isteğe bağlı)</label>
+        <textarea id="not" placeholder="Eklemek istediklerin..."></textarea>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🛍️ Sepet Özeti</h2>
+      <div id="sepetListe" class="cart-list"></div>
+      <div class="toplam-satir">
+        <span>TOPLAM</span>
+        <span class="tp" id="toplam">0₺</span>
+      </div>
+      <button class="btn-siparis" id="btnSiparis" onclick="siparisGonder()">
+        📱 WhatsApp'tan Sipariş Ver
+      </button>
+      <div class="note">
+        Sipariş bilgilerin WhatsApp'a hazır mesaj olarak gelecek.<br>
+        Onaylayıp gönderdiğinde sipariş bize ulaşır.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="sepet.js"></script>
+<script>
+// WhatsApp numarası - kendi numaranı yaz (başında ülke kodu, boşluksuz)
+const WA_NUMBER = "905551112233";   // ← BURAYA KENDI NUMARANI YAZ (905XXXXXXXXX)
+
+function sepetCiz(){
+  const list = Sepet.getir();
+  const el = document.getElementById('sepetListe');
+  if(!list.length){
+    el.innerHTML = '<div class="empty">Sepet boş<br><a href="urunler.html" style="color:var(--hot);font-weight:700">→ Ürünlere Git</a></div>';
+    document.getElementById('btnSiparis').disabled = true;
+  } else {
+    el.innerHTML = list.map(i => `
+      <div class="cart-item">
+        <img src="${i.img||''}" alt="${i.name}" onerror="this.style.display='none'">
+        <div class="info">
+          <div class="name">${i.name}</div>
+          <div class="adet">${i.adet} adet × ${i.fiyat}₺</div>
+        </div>
+        <div class="fiyat">${i.fiyat*i.adet}₺</div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('toplam').textContent = Sepet.toplam() + '₺';
+}
+
+function siparisGonder(){
+  const ad = document.getElementById('ad').value.trim();
+  const tel = document.getElementById('tel').value.trim();
+  const sehir = document.getElementById('sehir').value.trim();
+  const adres = document.getElementById('adres').value.trim();
+  const notu = document.getElementById('not').value.trim();
+  const list = Sepet.getir();
+  const toplam = Sepet.toplam();
+  
+  // Validation
+  const hataEl = document.getElementById('hata');
+  if(!ad || !tel || !sehir || !adres){
+    hataEl.textContent = '⚠ Lütfen zorunlu (*) alanları doldur.';
+    hataEl.style.display = 'block';
+    window.scrollTo(0,0);
+    return;
+  }
+  if(!list.length){
+    hataEl.textContent = '⚠ Sepetin boş.';
+    hataEl.style.display = 'block';
+    return;
+  }
+  hataEl.style.display = 'none';
+  
+  // Mesaj oluştur
+  const satirlar = list.map(i => `• ${i.name} × ${i.adet} = ${i.fiyat*i.adet}₺`).join('\n');
+  const mesaj = [
+    '🛍️ *YENİ SİPARİŞ - StickerLab*',
+    '',
+    '*Ad Soyad:* ' + ad,
+    '*Telefon:* ' + tel,
+    '*Şehir/İlçe:* ' + sehir,
+    '*Adres:* ' + adres,
+    notu ? '*Not:* ' + notu : '',
+    '',
+    '*Ürünler:*',
+    satirlar,
+    '',
+    '*TOPLAM: ' + toplam + '₺*'
+  ].filter(Boolean).join('\n');
+  
+  const url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(mesaj);
+  window.open(url, '_blank');
+}
+
+sepetCiz();
+</script>
+</body>
+</html>
